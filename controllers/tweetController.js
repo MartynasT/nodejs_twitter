@@ -10,7 +10,8 @@ const getTweets = async(req, res) =>{
 const createTweet = async(req, res) =>{
   try {
     const tweet = new Tweet({
-      content: req.body.content
+      content: req.body.content,
+      userId: req.user._id
     })
     let savedTweet = await tweet.save();
     res.send(savedTweet)
@@ -22,8 +23,9 @@ const createTweet = async(req, res) =>{
 
 const likeTweet = async(req, res) =>{
   try{
-    let id = await req.body.id;
-    Tweet.findOneAndUpdate(
+    if(!req.body.id) throw {message: 'provide ID'}
+    let id =  req.body.id;
+    await Tweet.findOneAndUpdate(
       { _id: id },
       { $inc: { likesCount: 1 } },
       {new: true},

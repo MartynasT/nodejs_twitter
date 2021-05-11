@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -13,6 +14,23 @@ const userSchema = new mongoose.Schema({
   registered: {
     type: Date,
     default: Date.now
+  }
+},{
+  toJSON: {
+    transform(doc, ret){
+      delete ret.password
+    }
+  }
+})
+
+userSchema.pre('save', function(next){
+  let user = this
+  if(user.isModified('password')){
+    let hash = bcrypt.hashSync(user.password, 10);
+    user.password = hash
+    next()
+  } else {
+    next()
   }
 })
 
